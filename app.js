@@ -1,5 +1,6 @@
-const express = require('express');
-const mongoose = require('mongoose'); // Require mongoose
+const express = require('express'); // Require Express
+const mongoose = require('mongoose'); // Require Mongoose
+const bodyParser = require('body-parser'); // Require Body Parser
 
 const db = mongoose.connect('mongodb://localhost/bookAPI'); // Connect to the database; If it doesn't exist, it'll create one
 
@@ -9,36 +10,14 @@ const app = express();
 
 const port = process.env.PORT || 3000;
 
-const bookRouter = express.Router();
+// .use() Is a Middleware loader for your Express app
+app.use(bodyParser.urlencoded({extended: true})); // (Middleware)
+app.use(bodyParser.json()); // (Middleware) Parses a Post Request Body into a JSON object
 
-bookRouter.route('/Books')
-  .get(function(req, res) {
-    var query = {};
+// Needs to be executed because it's exported as a function, Book is injected
+const bookRouter = require('./Routes/bookRoutes')(Book);
 
-    if (req.query.genre) { // Enables filtering by passing in the http query parameter only if the query is on genre
-      query.genre = req.query.genre;
-    }
-    Book.find(query, function(error, books) {
-      if(error) {
-        res.status(500).send(error); // Responds with an error status code and the error messsage
-      } else {
-        res.json(books); // Responds with the database JSON data
-      }
-    });
-  });
-
-bookRouter.route('/Books/:bookId') // Must use colon
-.get(function(req, res) {
-  Book.findById(req.params.bookId, function(error, book) { // Use the findById moongoose method and pass in the query parameter
-    if(error) {
-      res.status(500).send(error); // Responds with an error status code and the error messsage
-    } else {
-      res.json(book); // Responds with a book's JSON data which matches a specific ID
-    }
-  });
-});
-
-app.use('/api', bookRouter);
+app.use('/api/books', bookRouter);
 
 app.get('/', function(req, res) {
   res.send('Welcome to my API!');
