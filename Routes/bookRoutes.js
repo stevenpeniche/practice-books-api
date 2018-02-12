@@ -3,27 +3,10 @@ const express = require('express');
 const routes = function(Book) {
   const bookRouter = express.Router();
 
+  const bookController = require('../controllers/bookController')(Book);
   bookRouter.route('/')
-    .post(function(req, res) {
-      let book = new Book(req.body);
-
-      book.save(); // Saves the new book into MongoDB
-      res.status(201).send(book); // Sends back a Status to notify a new resource has beencreated and the new Book record
-    })
-    .get(function(req, res) {
-      let query = {};
-
-      if (req.query.genre) { // Enables filtering by passing in the http query parameter only if the query is on genre
-        query.genre = req.query.genre;
-      }
-      Book.find(query, function(error, books) {
-        if(error) {
-          res.status(500).send(error); // Responds with an error status code and the error messsage
-        } else {
-          res.json(books); // Responds with the database JSON data
-        }
-      });
-    });
+    .post(bookController.post)
+    .get(bookController.get);
 
   bookRouter.use('/:bookId', function(req, res, next) {
     Book.findById(req.params.bookId, function(error, book) { // Use the findById moongoose method and pass in the query parameter

@@ -2,7 +2,12 @@ const express = require('express'); // Require Express
 const mongoose = require('mongoose'); // Require Mongoose
 const bodyParser = require('body-parser'); // Require Body Parser
 
-const db = mongoose.connect('mongodb://localhost/bookAPI'); // Connect to the database; If it doesn't exist, it'll create one
+let db;
+if(process.env.ENV == 'Test') {
+  db = mongoose.connect('mongodb://localhost/bookAPI_test'); // Connect to the test database; If it doesn't exist, it'll create one
+} else {
+  db = mongoose.connect('mongodb://localhost/bookAPI'); // Connect to the production database; If it doesn't exist, it'll create one
+}
 
 const Book = require('./models/bookModel'); // Require the book model created in the models directory
 
@@ -24,5 +29,7 @@ app.get('/', function(req, res) {
 });
 
 app.listen(port, function() {
-  console.log('Server running on PORT: ' + port);
+  console.log('Gulp is running my app on PORT: ' + port);
 });
+
+module.exports = app;
